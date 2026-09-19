@@ -1,0 +1,37 @@
+{
+  "name": "mailhere",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development next dev",
+    "build": "next build",
+    "dev:convex": "convex dev",
+    "deploy": "npx @convex-dev/static-hosting deploy -d out",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@agentmail/convex": "^0.1.0",
+    "@convex-dev/auth": "^0.0.95",
+    "@convex-dev/static-hosting": "^0.2.1",
+    "@firecrawl/firecrawl-convex": "^0.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "convex": "^1.46.0",
+    "lucide-react": "^0.545.0",
+    "next": "^15.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "cross-env": "^10.1.0",
+    "jose": "^6.2.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2"
+  }
+}
