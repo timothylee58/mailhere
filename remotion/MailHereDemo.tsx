@@ -348,6 +348,21 @@ const Outro = () => {
   );
 };
 
+const LiveBridge = () => {
+  const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return (
+    <Scene>
+      <div style={{ ...fadeUp(f, fps), fontSize: 56, fontWeight: 800, color: "#fff" }}>
+        Now — the real app, live.
+      </div>
+      <div style={{ ...fadeUp(f, fps, 15), fontSize: 28, color: C.muted, marginTop: 20 }}>
+        Everything you&apos;re about to see runs on the stack above.
+      </div>
+    </Scene>
+  );
+};
+
 export const MailHereDemo = () => (
   <>
     <Sequence durationInFrames={150}>
@@ -369,6 +384,28 @@ export const MailHereDemo = () => (
       <Stack />
     </Sequence>
     <Sequence from={1920} durationInFrames={240}>
+      <Outro />
+    </Sequence>
+  </>
+);
+
+export const MailHereIntro = () => (
+  <>
+    <Sequence durationInFrames={150}>
+      <Title />
+    </Sequence>
+    <Sequence from={150} durationInFrames={150}>
+      <LiveBridge />
+    </Sequence>
+  </>
+);
+
+export const MailHereOutro = () => (
+  <>
+    <Sequence durationInFrames={270}>
+      <Stack />
+    </Sequence>
+    <Sequence from={270} durationInFrames={210}>
       <Outro />
     </Sequence>
   </>

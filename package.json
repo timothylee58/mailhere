@@ -8,6 +8,8 @@
     "dev:convex": "convex dev",
     "deploy": "npx @convex-dev/static-hosting deploy -d out",
     "video": "remotion render remotion/index.ts MailHereDemo video/mailhere-demo.mp4",
+    "video:intro": "remotion render remotion/index.ts MailHereIntro video/intro.mp4",
+    "video:outro": "remotion render remotion/index.ts MailHereOutro video/outro.mp4",
     "video:studio": "remotion studio remotion/index.ts",
     "typecheck": "tsc --noEmit"
   },
