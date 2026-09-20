@@ -12,7 +12,7 @@
 - **Auth:** Convex Auth, password provider
 - **AI models:** gpt-4o-mini (default, configurable via `OPENAI_MODEL`)
 - **Started:** 2026-09-18T07:23:43Z
-- **Last updated:** 2026-09-19T21:15:00Z
+- **Last updated:** 2026-09-20T11:30:00Z
 
 ## Log
 
@@ -59,4 +59,13 @@ all applied). Published the Next.js static export through
 `@convex-dev/static-hosting` — live at the `convex.site` URL above. Pushed the
 initial commit to the public repo above. Remaining: end-to-end smoke test of
 real inbound email (needs AgentMail webhook pointed at
-`<site>/agentmail/webhook`), demo video, submission.
+`<site>/agentmail/webhook`), submission.
+
+### 2026-09-20 - working tree
+UI upgraded to real shadcn/ui (`shadcn init` + `add` for button, card, input,
+label, badge, textarea, separator, skeleton; custom success/warning badge
+variants kept). Redeployed static hosting — live bundle now uses shadcn
+components and Inter. Added Remotion for the submission video:
+`remotion/MailHereDemo.tsx` is a 72-second 1080p composition (title → forward
+flow → OpenAI extraction → live board → proactive digest → sponsor stack →
+URL card), rendered to `video/mailhere-demo.mp4` via `npm run video`.
