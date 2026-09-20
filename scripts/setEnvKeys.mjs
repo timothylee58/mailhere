@@ -16,7 +16,7 @@ if (pairs.length === 0) {
 for (const [name, value] of pairs) {
   execFileSync(
     process.execPath,
-    ["node_modules/convex/bin/main.js", "env", "set", name],
+    ["node_modules/convex/bin/main.js", "env", "set", "--deployment", "healthy-owl-64", name],
     { input: value, stdio: ["pipe", "ignore", "inherit"] },
   );
   console.log(`set ${name}`);
