@@ -12,7 +12,7 @@
 - **Auth:** Convex Auth, password provider
 - **AI models:** gpt-4o-mini (default, configurable via `OPENAI_MODEL`)
 - **Started:** 2026-09-18T07:23:43Z
-- **Last updated:** 2026-09-20T11:30:00Z
+- **Last updated:** 2026-09-20T03:47:03Z
 
 ## Log
 
@@ -69,3 +69,15 @@ components and Inter. Added Remotion for the submission video:
 `remotion/MailHereDemo.tsx` is a 72-second 1080p composition (title → forward
 flow → OpenAI extraction → live board → proactive digest → sponsor stack →
 URL card), rendered to `video/mailhere-demo.mp4` via `npm run video`.
+
+### 2026-09-20 - 01ffb61
+Split the Remotion demo into `video/intro.mp4` (10s title/sponsor bridge) and
+`video/outro.mp4` (16s stack/URL card) so the middle of the submission video can
+be a real screen recording (`remotion/Root.tsx`, `remotion/MailHereDemo.tsx`,
+`package.json`). Verified the inbound webhook path is mounted at
+`/agentmail/webhook` on the live site; the handler requires a valid
+`AGENTMAIL_WEBHOOK_SECRET` set from the AgentMail dashboard before real inbound
+email can be processed. The local key file had `AGENTMAIL_WEBHOOK_SECRET`
+concatenated onto the `AGENTMAIL_API_KEY` line, so both values need to be
+re-piped to the deployment via `scripts/setEnvKeys.mjs` once the dashboard secret
+is available.
