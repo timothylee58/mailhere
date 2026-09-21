@@ -12,7 +12,7 @@
 - **Auth:** Convex Auth, password provider
 - **AI models:** gpt-4o-mini (default, configurable via `OPENAI_MODEL`)
 - **Started:** 2026-09-18T07:23:43Z
-- **Last updated:** 2026-09-21T03:18:04Z
+- **Last updated:** 2026-09-21T03:43:40Z
 
 ## Log
 
@@ -97,3 +97,11 @@ and `npm run build` clean; redeployed to the `healthy-owl-64` convex.site
 deployment by targeting the prod deployment (`CONVEX_DEPLOYMENT=healthy-owl-64`)
 so the new animation bundle is live. Remaining: set `AGENTMAIL_WEBHOOK_SECRET`
 from the AgentMail dashboard and run an end-to-end forwarded notice test.
+
+### 2026-09-21 - working tree
+Set `AGENTMAIL_WEBHOOK_SECRET` on the `healthy-owl-64` production deployment via
+`scripts/setEnvKeys.mjs` (values piped through stdin, never printed). A direct
+unsigned POST to `/agentmail/webhook` now returns HTTP 401, confirming the
+AgentMail handler is verifying signatures instead of failing on a missing secret.
+Next step is a real forwarded regulator notice end-to-end test once the webhook
+URL is configured in the AgentMail dashboard.
