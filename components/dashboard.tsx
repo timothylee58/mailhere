@@ -12,6 +12,7 @@ import { CircularList } from "@/components/circular-list";
 import { DemoPanel } from "@/components/demo-panel";
 import { InboxCard } from "@/components/inbox-card";
 import { NoticeList } from "@/components/notice-list";
+import { MotionContainer, MotionItem } from "@/components/motion-provider";
 
 export function Dashboard() {
   const business = useQuery(api.businesses.mine);
@@ -37,43 +38,61 @@ export function Dashboard() {
       </div>
     );
   }
-  if (business === null) return <BusinessSetup />;
+  if (business === null) {
+    return (
+      <MotionContainer className="mx-auto max-w-6xl px-6 py-8">
+        <MotionItem>
+          <BusinessSetup />
+        </MotionItem>
+      </MotionContainer>
+    );
+  }
 
   const next = upcoming?.[0];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">MailHere</h1>
-          <p className="text-sm text-muted-foreground">
-            {business.name} ·{" "}
-            {business.categories.map((c) => AGENCY_LABELS[c]).join(" · ")}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {next?.deadline && (
-            <Badge variant="warning">
-              Next deadline: {formatDeadline(next.deadline)} (
-              {daysUntil(next.deadline)}d)
-            </Badge>
-          )}
-          <Button variant="ghost" size="sm" onClick={() => void signOut()}>
-            Sign out
-          </Button>
-        </div>
-      </header>
+    <MotionContainer className="mx-auto max-w-6xl px-6 py-8">
+      <MotionItem>
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">MailHere</h1>
+            <p className="text-sm text-muted-foreground">
+              {business.name} ·{" "}
+              {business.categories.map((c) => AGENCY_LABELS[c]).join(" · ")}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {next?.deadline && (
+              <Badge variant="warning">
+                Next deadline: {formatDeadline(next.deadline)} (
+                {daysUntil(next.deadline)}d)
+              </Badge>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+              Sign out
+            </Button>
+          </div>
+        </header>
+      </MotionItem>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6">
-          <InboxCard />
-          <DemoPanel />
+          <MotionItem>
+            <InboxCard />
+          </MotionItem>
+          <MotionItem>
+            <DemoPanel />
+          </MotionItem>
         </div>
         <div className="lg:col-span-2 space-y-6">
-          <NoticeList />
-          <CircularList />
+          <MotionItem>
+            <NoticeList />
+          </MotionItem>
+          <MotionItem>
+            <CircularList />
+          </MotionItem>
         </div>
       </div>
-    </div>
+    </MotionContainer>
   );
 }

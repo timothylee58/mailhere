@@ -3,7 +3,9 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { AGENCY_LABELS, daysUntil, formatDeadline } from "@/lib/agencies";
+import { reducedMotionVariants, noticeItemVariants } from "@/lib/motion";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -51,9 +53,18 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
   const days = daysUntil(notice.deadline);
   const isDone = !!notice.resolvedAt;
   const isDemo = notice.threadId.startsWith("demo-");
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="rounded-md border p-4 space-y-2">
+    <motion.div
+      layout
+      layoutId={notice._id}
+      variants={prefersReducedMotion ? reducedMotionVariants : noticeItemVariants}
+      initial="hidden"
+      animate="show"
+      exit="exit"
+      className="rounded-md border p-4 space-y-2"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{notice.subject}</p>
@@ -69,7 +80,16 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
           {notice.agency && (
             <Badge variant="outline">{AGENCY_LABELS[notice.agency]}</Badge>
           )}
-          <Badge variant={status.variant}>{status.label}</Badge>
+          {notice.status === "parsing" && !prefersReducedMotion ? (
+            <motion.span
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+            >
+              <Badge variant={status.variant}>{status.label}</Badge>
+            </motion.span>
+          ) : (
+            <Badge variant={status.variant}>{status.label}</Badge>
+          )}
         </div>
       </div>
       {notice.summary && (
@@ -91,14 +111,15 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
             {notice.requiredAction}
           </span>
         )}
-        <button
+        <motion.button
           type="button"
           onClick={() => void setResolved({ noticeId: notice._id, resolved: !isDone })}
           aria-pressed={isDone}
+          whileTap={{ scale: 0.95 }}
           className="ml-auto rounded border border-input px-2 py-0.5 text-xs hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {isDone ? "Reopen" : "Mark done"}
-        </button>
+        </motion.button>
       </div>
       {notice.replyText && (
         <details className="text-sm">
@@ -111,7 +132,7 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
       {notice.error && (
         <p className="text-xs text-destructive">{notice.error}</p>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -142,23 +163,33 @@ export function NoticeList() {
             demo panel.
           </p>
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
-            {(["overdue", "upcoming", "done"] as const).map((g) => (
-              <section key={g} aria-label={GROUP_LABELS[g]} className="space-y-3">
-                <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  {GROUP_LABELS[g]}
-                  <Badge variant="secondary">{groups[g].length}</Badge>
-                </h3>
-                {groups[g].length === 0 ? (
-                  <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                    Nothing here
-                  </p>
-                ) : (
-                  groups[g].map((n) => <NoticeCard key={n._id} notice={n} />)
-                )}
-              </section>
-            ))}
-          </div>
+          <LayoutGroup>
+            <div className="grid gap-4 md:grid-cols-3">
+              {(["overdue", "upcoming", "done"] as const).map((g) => (
+                <section key={g} aria-label={GROUP_LABELS[g]} className="space-y-3">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold">
+                    {GROUP_LABELS[g]}
+                    <Badge variant="secondary">{groups[g].length}</Badge>
+                  </h3>
+                  <AnimatePresence mode="popLayout">
+                    {groups[g].length === 0 ? (
+                      <motion.p
+                        key={`empty-${g}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="rounded-md border border-dashed p-3 text-xs text-muted-foreground"
+                      >
+                        Nothing here
+                      </motion.p>
+                    ) : (
+                      groups[g].map((n) => <NoticeCard key={n._id} notice={n} />)
+                    )}
+                  </AnimatePresence>
+                </section>
+              ))}
+            </div>
+          </LayoutGroup>
         )}
       </CardContent>
     </Card>

@@ -3,6 +3,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { AGENCIES, AGENCY_LABELS, type Agency } from "@/lib/agencies";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,11 +97,13 @@ export function BusinessSetup() {
               <legend className="text-sm font-medium">Regulators</legend>
               <div className="flex flex-wrap gap-2">
                 {AGENCIES.map((a) => (
-                  <button
+                  <motion.button
                     key={a}
                     type="button"
+                    layout
                     onClick={() => toggle(a)}
                     aria-pressed={categories.has(a)}
+                    whileTap={{ scale: 0.94 }}
                     className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
                       categories.has(a)
                         ? "border-primary bg-primary text-primary-foreground"
@@ -108,7 +111,7 @@ export function BusinessSetup() {
                     }`}
                   >
                     {AGENCY_LABELS[a]}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </fieldset>

@@ -3,6 +3,7 @@
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
+const MotionButton = motion(Button);
 
 const SAMPLE = {
   subject: "SSM: Reminder to lodge annual return",
@@ -63,9 +66,15 @@ export function DemoPanel() {
               defaultValue={SAMPLE.text}
             />
           </div>
-          <Button type="submit" variant="secondary" size="sm" disabled={busy}>
+          <MotionButton
+            type="submit"
+            variant="secondary"
+            size="sm"
+            disabled={busy}
+            whileTap={{ scale: 0.98 }}
+          >
             {busy ? "Sending…" : "Simulate forwarded notice"}
-          </Button>
+          </MotionButton>
         </form>
       </CardContent>
     </Card>

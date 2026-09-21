@@ -2,6 +2,7 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const MotionButton = motion(Button);
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
@@ -74,13 +77,18 @@ export function SignInForm() {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <MotionButton
+            type="submit"
+            className="w-full"
+            disabled={submitting}
+            whileTap={{ scale: 0.98 }}
+          >
             {submitting
               ? "Working…"
               : flow === "signIn"
                 ? "Sign in"
                 : "Create account"}
-          </Button>
+          </MotionButton>
           <button
             type="button"
             className="w-full text-center text-sm text-muted-foreground underline-offset-2 hover:underline"
