@@ -1,11 +1,13 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
-import { components } from "./_generated/api";
+import { components, internal } from "./_generated/api";
 import { registerStaticRoutes } from "@convex-dev/static-hosting";
 import { AgentMail } from "@agentmail/convex";
 import { auth } from "./auth";
 
-const agentmail = new AgentMail(components.agentmail);
+const agentmail = new AgentMail(components.agentmail, {
+  onMessageReceived: internal.email.onMessageReceived,
+});
 
 const http = httpRouter();
 

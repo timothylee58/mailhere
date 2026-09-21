@@ -105,3 +105,19 @@ unsigned POST to `/agentmail/webhook` now returns HTTP 401, confirming the
 AgentMail handler is verifying signatures instead of failing on a missing secret.
 Next step is a real forwarded regulator notice end-to-end test once the webhook
 URL is configured in the AgentMail dashboard.
+
+### 2026-09-21 - working tree
+Fixed AgentMail component environment binding in `convex/convex.config.ts`:
+declared `AGENTMAIL_API_KEY`, `AGENTMAIL_WEBHOOK_SECRET`, and optional
+`AGENTMAIL_BASE_URL` at the app level and passed them into
+`app.use(agentmail, { env: ... })`, matching the Firecrawl component pattern.
+Updated `convex/http.ts` to register `internal.email.onMessageReceived` via the
+`AgentMail` client so inbound webhooks dispatch into the app. Rewrote
+`convex/setup.ts` to provision (or reuse) the shared inbox through the AgentMail
+REST API directly, with scope detection via `GET /v0/auth/me` so the same code
+works with organization-level and inbox-scoped keys. Deployed to prod
+`healthy-owl-64` (`tsc` clean). The stored `AGENTMAIL_API_KEY` is rejected by
+AgentMail's `/v0/auth/me` endpoint with HTTP 403, so the key value in
+`scripts/.env.keys` needs to be verified/replaced with the full, unrevoked key
+from console.agentmail.to and re-piped with `node scripts/setEnvKeys.mjs` before
+inbox provisioning and end-to-end email flow can succeed.
