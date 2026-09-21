@@ -12,7 +12,7 @@
 - **Auth:** Convex Auth, password provider
 - **AI models:** gpt-4o-mini (default, configurable via `OPENAI_MODEL`)
 - **Started:** 2026-09-18T07:23:43Z
-- **Last updated:** 2026-09-20T03:47:03Z
+- **Last updated:** 2026-09-21T03:18:04Z
 
 ## Log
 
@@ -81,3 +81,19 @@ email can be processed. The local key file had `AGENTMAIL_WEBHOOK_SECRET`
 concatenated onto the `AGENTMAIL_API_KEY` line, so both values need to be
 re-piped to the deployment via `scripts/setEnvKeys.mjs` once the dashboard secret
 is available.
+
+### 2026-09-21 - 2f82b7e
+Implemented the approved Framer Motion animation plan across the frontend.
+Installed `framer-motion` and added shared motion primitives in `lib/motion.ts`
+plus a reduced-motion-aware `components/motion-provider.tsx`. Animated the
+landing/auth transitions (`app/page.tsx`), dashboard entrance
+(`components/dashboard.tsx`), notice board layout with cross-column movement
+(`components/notice-list.tsx`), demo button and crawl-spinner feedback
+(`components/demo-panel.tsx`, `components/circular-list.tsx`), regulator chip
+selection (`components/business-setup.tsx`), and sign-in card transitions
+(`components/sign-in-form.tsx`). Also fixed `scripts/setEnvKeys.mjs` (`d43ea1b`)
+to target the `healthy-owl-64` production deployment. Verified `npm run typecheck`
+and `npm run build` clean; redeployed to the `healthy-owl-64` convex.site
+deployment by targeting the prod deployment (`CONVEX_DEPLOYMENT=healthy-owl-64`)
+so the new animation bundle is live. Remaining: set `AGENTMAIL_WEBHOOK_SECRET`
+from the AgentMail dashboard and run an end-to-end forwarded notice test.
