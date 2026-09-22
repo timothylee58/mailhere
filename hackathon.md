@@ -2,17 +2,17 @@
 
 - **Project:** MailHere
 - **Event:** Convex All Gas Hackathon
-- **What it does:** Compliance inbox for Malaysian MSMEs. Owners forward regulator notices (SSM, LHDN, KWSP, SOCSO) to a dedicated email address; an agent extracts the deadline, agency, and required action, replies in plain language, and tracks it on a live dashboard. The inbox also emails businesses when a newly crawled circular matches their registered category.
+- **What it does:** Compliance inbox for small businesses in Malaysia, the US, the UK, or Singapore. Owners forward regulator notices to a dedicated email address; an agent extracts the deadline, agency, and required action, replies in plain language (in whatever language the notice arrived in), and tracks it on a live dashboard. The inbox also emails businesses when a newly crawled circular matches their registered category. The country/regulator set is a registry (`convex/agencyRegistry.ts`), not hardcoded.
 - **Live app:** https://healthy-owl-64.convex.site
 - **Repo:** https://github.com/timothylee58/mailhere
 - **Frontend:** Convex static hosting
 - **Convex deployment:** prod `healthy-owl-64` (project `mailhere`, team `timothy-lee-dcf7f`); local anonymous deployment used for dev
-- **Components:** AgentMail (`@agentmail/convex`), Firecrawl (`@firecrawl/firecrawl-convex`), static hosting (`@convex-dev/static-hosting`) — all registered in `convex/convex.config.ts`
-- **Convex features:** queries, mutations, actions, internal functions, indexes, scheduled crons, HTTP routes (AgentMail webhook), reactive component queries
+- **Components:** AgentMail (`@agentmail/convex`), Firecrawl (`@firecrawl/firecrawl-convex`), static hosting (`@convex-dev/static-hosting`), Migrations (`@convex-dev/migrations`) — all registered in `convex/convex.config.ts`
+- **Convex features:** queries, mutations, actions, internal functions, indexes, scheduled crons, HTTP routes (AgentMail webhook), reactive component queries, batched/resumable data migrations
 - **Auth:** Convex Auth, password provider
 - **AI models:** gpt-4o-mini (default, configurable via `OPENAI_MODEL`)
 - **Started:** 2026-09-18T07:23:43Z
-- **Last updated:** 2026-09-21T03:43:40Z
+- **Last updated:** 2026-09-22T07:43:50Z
 
 ## Log
 
@@ -121,3 +121,56 @@ AgentMail's `/v0/auth/me` endpoint with HTTP 403, so the key value in
 `scripts/.env.keys` needs to be verified/replaced with the full, unrevoked key
 from console.agentmail.to and re-piped with `node scripts/setEnvKeys.mjs` before
 inbox provisioning and end-to-end email flow can succeed.
+
+### 2026-09-22 - af661ea
+Patched the published `@agentmail/convex` component: its `convex.config.js`
+didn't declare an `env` schema, so `app.use(agentmail, { env })` in
+`convex/convex.config.ts` had no real effect on the component. Wired the fix
+through `patch-package` (`patches/@agentmail+convex+0.1.0.patch`, `postinstall`
+script) so it survives every `npm install` instead of needing a manual
+`node_modules` edit.
+
+### 2026-09-22 - 150a49e
+Design pass on theme and motion. Replaced the stock shadcn palette/type with a
+token system grounded in the product itself — forwarded official mail — plus
+one signature motion moment: a postmark stamp that lands on a notice when it's
+marked done (`components/postmark-stamp.tsx`, `lib/motion.ts`,
+`app/globals.css`, `app/layout.tsx`). Also moved the hackathon skill to
+`.claude/skills/convex-hackathon-skill/`, the path Claude Code expects.
+
+### 2026-09-22 - 35ea866
+Generalized the compliance model from Malaysia-only to a curated preset per
+country (MY, US, UK, SG), on a separate branch so the working submission
+stayed untouched during the change. Added `convex/agencyRegistry.ts` as the
+single source of truth for countries and their regulators (code, label, crawl
+source URL) that both backend and frontend read from; `convex/pipeline.ts`'s
+extraction/reply prompts no longer assume Malaysian SMEs or a fixed 3-language
+set; `convex/crawler.ts`'s crawl sources are now generated from the registry
+across all four countries; the business-registration form gained a country
+selector that filters the regulator checklist.
+
+### 2026-09-22 - 55a37e0
+Deepened the visual identity with texture rather than new color or motion: a
+subtle dot-grid paper background, an ink-tinted card shadow, dashed
+ledger-style dividers between the Overdue/Upcoming/Done columns, and a large,
+near-invisible postmark watermark behind the landing hero echoing the one
+signature element. Verified live against the real dev account, including the
+real postmark stamp rendering on an actual notice.
+
+### 2026-09-22 - 9008584 / 604c15b
+Merged the multi-country branch into `master` and migrated the real production
+data to match: `businesses.country` backfilled, MY-only agency codes remapped
+to the registry's country-prefixed codes across businesses/notices/circulars/
+regulatorSources, and the renamed registration-number field copied over. Added
+`@convex-dev/migrations` and `convex/migrations.ts` for the backfill, rehearsed
+on a throwaway deployment seeded from a real production snapshot before
+running it against production for real — both runs verified by reading the
+migrated rows back. Also picked up a pending fix to `convex/setup.ts` adding
+pod-scoped AgentMail API key support to inbox provisioning, and regenerated
+the `patch-package` patch from the canonical hand-edited source after a
+whitespace mismatch made it fail to apply on a fresh install.
+
+### 2026-09-22 - ae002fb
+Added a project README: what the app does, how the extraction/reply/crawl
+pipeline works, the tech stack, project structure, required environment
+variables, and run/deploy instructions.
