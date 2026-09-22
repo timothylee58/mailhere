@@ -51,7 +51,7 @@ function Landing() {
       <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-10 px-6 py-16 lg:flex-row lg:gap-16">
         <MotionContainer className="max-w-lg space-y-5">
           <MotionItem className="space-y-3">
-            <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-stamp">
+            <p className="font-display text-xl font-semibold italic tracking-tight text-stamp">
               MailHere
             </p>
             <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">

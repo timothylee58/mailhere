@@ -55,7 +55,7 @@ export function Dashboard() {
       <MotionItem>
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-2xl font-semibold italic tracking-tight text-stamp">
               MailHere
             </h1>
             <p className="text-sm text-muted-foreground">
