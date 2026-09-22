@@ -80,7 +80,7 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
           />
         )}
       </AnimatePresence>
-      <div className="flex items-start justify-between gap-3 pr-10">
+      <div className="flex flex-col gap-2 pr-10 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{notice.subject}</p>
           <p className="text-xs text-muted-foreground">
@@ -88,7 +88,7 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
             {new Date(notice.receivedAt).toLocaleString()}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           {notice.language && (
             <Badge variant="outline" className="font-mono">
               {notice.language.toUpperCase()}
@@ -183,12 +183,12 @@ export function NoticeList() {
           </p>
         ) : (
           <LayoutGroup>
-            <div className="grid gap-4 md:grid-cols-3 md:divide-x md:divide-dashed md:divide-border">
+            <div className="grid gap-4 divide-y divide-dashed divide-border lg:grid-cols-3 lg:divide-x lg:divide-y-0">
               {(["overdue", "upcoming", "done"] as const).map((g) => (
                 <section
                   key={g}
                   aria-label={GROUP_LABELS[g]}
-                  className="space-y-3 md:px-4 md:first:pl-0 md:last:pr-0"
+                  className="space-y-3 pt-4 first:pt-0 lg:px-4 lg:pt-0 lg:first:pl-0 lg:last:pr-0"
                 >
                   <h3 className="flex items-center gap-2 text-sm font-semibold">
                     {GROUP_LABELS[g]}
