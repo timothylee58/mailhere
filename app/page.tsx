@@ -9,6 +9,7 @@ import {
   MotionFade,
   MotionItem,
 } from "@/components/motion-provider";
+import { PostmarkWatermark } from "@/components/postmark-watermark";
 
 export default function Home() {
   const { isLoading, isAuthenticated } = useConvexAuth();
@@ -45,8 +46,9 @@ export default function Home() {
 
 function Landing() {
   return (
-    <MotionFade key="auth" className="min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-10 px-6 py-16 lg:flex-row lg:gap-16">
+    <MotionFade key="auth" className="relative min-h-screen overflow-hidden">
+      <PostmarkWatermark className="absolute -right-24 -top-24 size-[420px] opacity-[0.05] lg:size-[560px]" />
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-10 px-6 py-16 lg:flex-row lg:gap-16">
         <MotionContainer className="max-w-lg space-y-5">
           <MotionItem className="space-y-3">
             <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-stamp">

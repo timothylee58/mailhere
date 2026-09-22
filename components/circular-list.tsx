@@ -4,7 +4,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { Newspaper, RefreshCw } from "lucide-react";
 import { AGENCY_LABELS, formatDeadline } from "@/lib/agencies";
 import { reducedMotionVariants } from "@/lib/motion";
 import { Badge } from "@/components/ui/badge";
@@ -65,14 +65,15 @@ export function CircularList() {
         {circulars === undefined ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : circulars.length === 0 ? (
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-sm text-muted-foreground"
+            className="flex items-center gap-2 rounded-md border border-dashed p-4 text-sm text-muted-foreground"
           >
+            <Newspaper className="size-4 shrink-0 opacity-50" strokeWidth={1.5} />
             Nothing yet — hit &ldquo;Crawl now&rdquo; to pull the latest from the
             regulator sites.
-          </motion.p>
+          </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
             {circulars.map((c) => (

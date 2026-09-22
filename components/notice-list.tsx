@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { MailX } from "lucide-react";
 import { AGENCY_LABELS, daysUntil, formatDeadline } from "@/lib/agencies";
 import { reducedMotionVariants, listItem } from "@/lib/motion";
 import { PostmarkStamp } from "@/components/postmark-stamp";
@@ -58,7 +59,16 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
       initial="hidden"
       animate="show"
       exit="exit"
-      className="relative rounded-md border p-4 space-y-2"
+      whileHover={
+        prefersReducedMotion
+          ? undefined
+          : {
+              y: -2,
+              boxShadow: "0 4px 14px -6px rgba(27,42,74,0.18)",
+              transition: { duration: 0.15 },
+            }
+      }
+      className="relative rounded-md border bg-card p-4 space-y-2"
     >
       <AnimatePresence>
         {isDone && (
@@ -173,24 +183,29 @@ export function NoticeList() {
           </p>
         ) : (
           <LayoutGroup>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3 md:divide-x md:divide-dashed md:divide-border">
               {(["overdue", "upcoming", "done"] as const).map((g) => (
-                <section key={g} aria-label={GROUP_LABELS[g]} className="space-y-3">
+                <section
+                  key={g}
+                  aria-label={GROUP_LABELS[g]}
+                  className="space-y-3 md:px-4 md:first:pl-0 md:last:pr-0"
+                >
                   <h3 className="flex items-center gap-2 text-sm font-semibold">
                     {GROUP_LABELS[g]}
                     <Badge variant="secondary">{groups[g].length}</Badge>
                   </h3>
                   <AnimatePresence mode="popLayout">
                     {groups[g].length === 0 ? (
-                      <motion.p
+                      <motion.div
                         key={`empty-${g}`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="rounded-md border border-dashed p-3 text-xs text-muted-foreground"
+                        className="flex flex-col items-center gap-1.5 rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground"
                       >
+                        <MailX className="size-4 opacity-50" strokeWidth={1.5} />
                         Nothing here
-                      </motion.p>
+                      </motion.div>
                     ) : (
                       groups[g].map((n) => <NoticeCard key={n._id} notice={n} />)
                     )}
