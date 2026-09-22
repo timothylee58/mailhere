@@ -725,7 +725,7 @@ const Outro = () => {
   );
 };
 
-// ---------- Full 3-minute composition (30fps, 5400 frames) ----------
+// ---------- Full composition, under 3 minutes (30fps, 5100 frames = 2:50) ----------
 
 export const MailHereDemo = () => (
   <>
@@ -735,25 +735,25 @@ export const MailHereDemo = () => (
     <Sequence from={360} durationInFrames={540}>
       <Problem />
     </Sequence>
-    <Sequence from={900} durationInFrames={750}>
+    <Sequence from={900} durationInFrames={690}>
       <ForwardFlow />
     </Sequence>
-    <Sequence from={1650} durationInFrames={750}>
+    <Sequence from={1590} durationInFrames={690}>
       <Pipeline />
     </Sequence>
-    <Sequence from={2400} durationInFrames={1050}>
+    <Sequence from={2280} durationInFrames={900}>
       <Dashboard />
     </Sequence>
-    <Sequence from={3450} durationInFrames={750}>
+    <Sequence from={3180} durationInFrames={720}>
       <Digest />
     </Sequence>
-    <Sequence from={4200} durationInFrames={600}>
+    <Sequence from={3900} durationInFrames={600}>
       <Registry />
     </Sequence>
-    <Sequence from={4800} durationInFrames={450}>
+    <Sequence from={4500} durationInFrames={450}>
       <Stack />
     </Sequence>
-    <Sequence from={5250} durationInFrames={150}>
+    <Sequence from={4950} durationInFrames={150}>
       <Outro />
     </Sequence>
   </>
