@@ -6,7 +6,7 @@ export const RemotionRoot = () => (
     <Composition
       id="MailHereDemo"
       component={MailHereDemo}
-      durationInFrames={2160}
+      durationInFrames={5400}
       fps={30}
       width={1920}
       height={1080}
@@ -14,7 +14,7 @@ export const RemotionRoot = () => (
     <Composition
       id="MailHereIntro"
       component={MailHereIntro}
-      durationInFrames={300}
+      durationInFrames={900}
       fps={30}
       width={1920}
       height={1080}
@@ -22,7 +22,7 @@ export const RemotionRoot = () => (
     <Composition
       id="MailHereOutro"
       component={MailHereOutro}
-      durationInFrames={480}
+      durationInFrames={600}
       fps={30}
       width={1920}
       height={1080}
