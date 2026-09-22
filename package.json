@@ -18,6 +18,7 @@
     "@agentmail/convex": "^0.1.0",
     "@base-ui/react": "^1.8.0",
     "@convex-dev/auth": "^0.0.95",
+    "@convex-dev/migrations": "^0.3.6",
     "@convex-dev/static-hosting": "^0.2.1",
     "@firecrawl/firecrawl-convex": "^0.1.1",
     "@remotion/cli": "^4.0.526",

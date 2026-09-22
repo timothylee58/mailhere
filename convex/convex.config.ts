@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import agentmail from "@agentmail/convex/convex.config";
 import firecrawl from "@firecrawl/firecrawl-convex/convex.config";
 import staticHosting from "@convex-dev/static-hosting/convex.config";
+import migrations from "@convex-dev/migrations/convex.config";
 
 const app = defineApp({
   env: {
@@ -29,5 +30,6 @@ app.use(firecrawl, {
   },
 });
 app.use(staticHosting);
+app.use(migrations);
 
 export default app;
