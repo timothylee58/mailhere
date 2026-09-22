@@ -56,7 +56,9 @@ export function BusinessSetup() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6 px-6 py-16">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Register your business</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">
+          Register your business
+        </h1>
         <p className="text-sm text-muted-foreground">
           MailHere matches circulars and replies using these details.
         </p>

@@ -48,17 +48,13 @@ function Landing() {
     <MotionFade key="auth" className="min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-10 px-6 py-16 lg:flex-row lg:gap-16">
         <MotionContainer className="max-w-lg space-y-5">
-          <MotionItem>
-            <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+          <MotionItem className="space-y-3">
+            <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-stamp">
               MailHere
             </p>
-          </MotionItem>
-          <MotionItem>
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">
               Never miss a regulator deadline again.
             </h1>
-          </MotionItem>
-          <MotionItem>
             <p className="text-lg text-muted-foreground">
               Forward notices from SSM, LHDN, KWSP or SOCSO to your MailHere inbox.
               We extract the deadline and required action, reply in plain language,

@@ -55,7 +55,9 @@ export function Dashboard() {
       <MotionItem>
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">MailHere</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-tight">
+              MailHere
+            </h1>
             <p className="text-sm text-muted-foreground">
               {business.name} ·{" "}
               {business.categories.map((c) => AGENCY_LABELS[c]).join(" · ")}

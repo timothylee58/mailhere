@@ -5,7 +5,8 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { AGENCY_LABELS, daysUntil, formatDeadline } from "@/lib/agencies";
-import { reducedMotionVariants, noticeItemVariants } from "@/lib/motion";
+import { reducedMotionVariants, listItem } from "@/lib/motion";
+import { PostmarkStamp } from "@/components/postmark-stamp";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -59,13 +60,23 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
     <motion.div
       layout
       layoutId={notice._id}
-      variants={prefersReducedMotion ? reducedMotionVariants : noticeItemVariants}
+      variants={prefersReducedMotion ? reducedMotionVariants : listItem}
       initial="hidden"
       animate="show"
       exit="exit"
-      className="rounded-md border p-4 space-y-2"
+      className="relative rounded-md border p-4 space-y-2"
     >
-      <div className="flex items-start justify-between gap-3">
+      <AnimatePresence>
+        {isDone && (
+          <PostmarkStamp
+            key="stamp"
+            label="DONE"
+            tone="moss"
+            className="absolute right-2 top-2"
+          />
+        )}
+      </AnimatePresence>
+      <div className="flex items-start justify-between gap-3 pr-10">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{notice.subject}</p>
           <p className="text-xs text-muted-foreground">
@@ -99,7 +110,9 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
         {notice.deadline && (
           <span>
             <span className="text-muted-foreground">Deadline: </span>
-            <span className={days !== null && days <= 7 ? "font-semibold text-destructive" : "font-medium"}>
+            <span
+              className={`font-mono ${days !== null && days <= 7 ? "font-medium text-destructive" : ""}`}
+            >
               {formatDeadline(notice.deadline)}
               {days !== null && ` (${days}d)`}
             </span>
