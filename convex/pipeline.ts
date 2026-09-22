@@ -8,25 +8,24 @@ import {
 } from "./_generated/server";
 import { chatJSON, chatText } from "./openai";
 import { agencyValidator } from "./schema";
+import { ALL_AGENCY_CODES, AGENCY_LABELS } from "./agencyRegistry";
 
 const agentmail = new AgentMail(components.agentmail);
 
-const AGENCIES = ["ssm", "lhdn", "kwsp", "socso"] as const;
+const AGENCY_LIST = ALL_AGENCY_CODES.map(
+  (code) => `"${code}" (${AGENCY_LABELS[code]})`,
+).join(", ");
 
 type Extraction = {
   isRegulatorNotice: boolean;
-  agency: (typeof AGENCIES)[number] | "other" | null;
+  agency: string | null;
   deadline: string | null; // YYYY-MM-DD
   requiredAction: string | null;
   summary: string;
-  language: "en" | "ms" | "zh" | "other" | null;
-};
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  ms: "Bahasa Malaysia",
-  zh: "Mandarin Chinese",
-  other: "English",
+  /** BCP-47-ish language code the notice is written in, e.g. "en", "ms", "zh", "es". */
+  language: string | null;
+  /** Human-readable name of that language, e.g. "English", "Bahasa Malaysia". */
+  languageName: string | null;
 };
 
 function senderDomain(from: string): string {
@@ -66,6 +65,7 @@ export const applyExtraction = internalMutation({
     requiredAction: v.optional(v.string()),
     summary: v.string(),
     language: v.optional(v.string()),
+    languageName: v.optional(v.string()),
     status: v.union(
       v.literal("parsed"),
       v.literal("needs_review"),
@@ -144,13 +144,14 @@ export const processInbound = internalAction({
 
     try {
       const extraction = await chatJSON<Extraction>(
-        `You are a compliance assistant for Malaysian SMEs. Given a forwarded regulator notice email, extract structured data as JSON with exactly these keys:
-- "isRegulatorNotice": boolean — true if the underlying message is an official notice/circular/summons from a Malaysian regulator or authority (SSM, LHDN/IRBM, KWSP/EPF, SOCSO/PERKESO, or similar).
-- "agency": one of "ssm", "lhdn", "kwsp", "socso", "other", or null.
+        `You are a compliance assistant for small and medium businesses worldwide. Given a forwarded regulator notice email, extract structured data as JSON with exactly these keys:
+- "isRegulatorNotice": boolean — true if the underlying message is an official notice/circular/summons from a government regulator or tax/company authority, in any country.
+- "agency": the regulator's code if it matches one of ${AGENCY_LIST}, otherwise "other", or null.
 - "deadline": the compliance deadline as "YYYY-MM-DD", or null.
 - "requiredAction": the concrete thing the business must do, in one sentence, or null.
 - "summary": what this notice is about in at most two plain-language sentences.
-- "language": the language the notice is written in — "en" (English), "ms" (Bahasa Malaysia), "zh" (Mandarin Chinese), or "other".
+- "language": the short language code the notice is written in, e.g. "en", "ms", "zh", "es", "fr".
+- "languageName": that language's name in English, e.g. "English", "Bahasa Malaysia", "Spanish".
 Forwarded mail has "Fwd:" prefixes, quote chains, and signatures — find the underlying notice. Respond with JSON only.`,
         `Subject: ${args.subject}\n\nBody:\n${args.text.slice(0, 12000)}`,
       );
@@ -158,7 +159,12 @@ Forwarded mail has "Fwd:" prefixes, quote chains, and signatures — find the un
       const deadline = extraction.deadline
         ? Date.parse(`${extraction.deadline}T00:00:00Z`)
         : undefined;
-      const agency = extraction.agency ?? undefined;
+      const agency =
+        extraction.agency && ALL_AGENCY_CODES.includes(extraction.agency)
+          ? extraction.agency
+          : extraction.agency
+            ? "other"
+            : undefined;
       const status =
         extraction.isRegulatorNotice && (extraction.deadline || extraction.requiredAction)
           ? "parsed"
@@ -171,6 +177,7 @@ Forwarded mail has "Fwd:" prefixes, quote chains, and signatures — find the un
         requiredAction: extraction.requiredAction ?? undefined,
         summary: extraction.summary,
         language: extraction.language ?? undefined,
+        languageName: extraction.languageName ?? undefined,
         status,
       });
     } catch (e) {
@@ -188,11 +195,13 @@ Forwarded mail has "Fwd:" prefixes, quote chains, and signatures — find the un
     const notice = await ctx.runQuery(internal.pipeline.getNotice, { noticeId });
     if (!notice || notice.status !== "parsed") return null;
 
-    const replyLanguage =
-      LANGUAGE_NAMES[notice.language ?? "en"] ?? "English";
+    const replyLanguage = notice.languageName ?? "English";
+    const agencyLabel = notice.agency
+      ? (AGENCY_LABELS[notice.agency] ?? notice.agency)
+      : "unknown";
     const replyText = await chatText(
-      `You are MailHere, a compliance inbox for Malaysian SMEs. Write a plain-language email reply to the business owner about this regulator notice. Write the entire reply in ${replyLanguage}. Cover: what the notice is, the deadline (write the date clearly, e.g. "15 October 2026"), the exact action they must take, and one short line saying this is automated guidance, not legal advice. Under 150 words. No greeting sign-off beyond "— MailHere".`,
-      `Notice subject: ${notice.subject}\nAgency: ${notice.agency ?? "unknown"}\nDeadline: ${notice.deadline ? new Date(notice.deadline).toISOString().slice(0, 10) : "none detected"}\nRequired action: ${notice.requiredAction ?? "unknown"}\nSummary: ${notice.summary ?? ""}`,
+      `You are MailHere, a compliance inbox for small and medium businesses. Write a plain-language email reply to the business owner about this regulator notice. Write the entire reply in ${replyLanguage}. Cover: what the notice is, the deadline (write the date clearly, e.g. "15 October 2026"), the exact action they must take, and one short line saying this is automated guidance, not legal advice. Under 150 words. No greeting sign-off beyond "— MailHere".`,
+      `Notice subject: ${notice.subject}\nAgency: ${agencyLabel}\nDeadline: ${notice.deadline ? new Date(notice.deadline).toISOString().slice(0, 10) : "none detected"}\nRequired action: ${notice.requiredAction ?? "unknown"}\nSummary: ${notice.summary ?? ""}`,
     );
 
     const outboundId = await ctx.runMutation(internal.pipeline.sendReply, {

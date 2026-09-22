@@ -28,12 +28,6 @@ const STATUS_VARIANTS: Record<
   failed: { label: "Failed", variant: "destructive" },
 };
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  en: "EN",
-  ms: "BM",
-  zh: "中文",
-};
-
 type Group = "overdue" | "upcoming" | "done";
 
 function groupOf(n: Doc<"notices">): Group {
@@ -81,12 +75,14 @@ function NoticeCard({ notice }: { notice: Doc<"notices"> }) {
           <p className="truncate text-sm font-medium">{notice.subject}</p>
           <p className="text-xs text-muted-foreground">
             {isDemo ? "demo" : `via email · ${notice.senderDomain}`} ·{" "}
-            {new Date(notice.receivedAt).toLocaleString("en-MY")}
+            {new Date(notice.receivedAt).toLocaleString()}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {notice.language && LANGUAGE_LABELS[notice.language] && (
-            <Badge variant="outline">{LANGUAGE_LABELS[notice.language]}</Badge>
+          {notice.language && (
+            <Badge variant="outline" className="font-mono">
+              {notice.language.toUpperCase()}
+            </Badge>
           )}
           {notice.agency && (
             <Badge variant="outline">{AGENCY_LABELS[notice.agency]}</Badge>

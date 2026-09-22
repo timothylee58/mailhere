@@ -5,14 +5,15 @@ import {
   mutation,
   query,
 } from "./_generated/server";
-import { agencyValidator } from "./schema";
+import { agencyValidator, countryValidator } from "./schema";
 
 const businessDoc = v.object({
   _id: v.id("businesses"),
   _creationTime: v.number(),
   userId: v.id("users"),
   name: v.string(),
-  ssmRegistrationNo: v.optional(v.string()),
+  country: countryValidator,
+  registrationNo: v.optional(v.string()),
   contactEmail: v.string(),
   categories: v.array(agencyValidator),
   createdAt: v.number(),
@@ -34,7 +35,8 @@ export const mine = query({
 export const upsertMine = mutation({
   args: {
     name: v.string(),
-    ssmRegistrationNo: v.optional(v.string()),
+    country: countryValidator,
+    registrationNo: v.optional(v.string()),
     contactEmail: v.string(),
     categories: v.array(agencyValidator),
   },
@@ -51,7 +53,8 @@ export const upsertMine = mutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         name: args.name,
-        ssmRegistrationNo: args.ssmRegistrationNo,
+        country: args.country,
+        registrationNo: args.registrationNo,
         contactEmail: args.contactEmail,
         categories: args.categories,
       });
@@ -61,7 +64,8 @@ export const upsertMine = mutation({
     return await ctx.db.insert("businesses", {
       userId,
       name: args.name,
-      ssmRegistrationNo: args.ssmRegistrationNo,
+      country: args.country,
+      registrationNo: args.registrationNo,
       contactEmail: args.contactEmail,
       categories: args.categories,
       createdAt: Date.now(),

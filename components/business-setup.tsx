@@ -4,7 +4,13 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AGENCIES, AGENCY_LABELS, type Agency } from "@/lib/agencies";
+import {
+  AGENCY_LABELS,
+  agenciesForCountry,
+  COUNTRIES,
+  COUNTRY_LABELS,
+  type Country,
+} from "@/lib/agencies";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,18 +21,27 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 export function BusinessSetup() {
   const upsert = useMutation(api.businesses.upsertMine);
-  const [categories, setCategories] = useState<Set<Agency>>(new Set());
+  const [country, setCountry] = useState<Country>("MY");
+  const [categories, setCategories] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const toggle = (a: Agency) =>
+  const agencies = agenciesForCountry(country);
+
+  const changeCountry = (next: Country) => {
+    setCountry(next);
+    setCategories(new Set());
+  };
+
+  const toggle = (code: string) =>
     setCategories((prev) => {
       const next = new Set(prev);
-      if (next.has(a)) next.delete(a);
-      else next.add(a);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
 
@@ -42,7 +57,8 @@ export function BusinessSetup() {
     try {
       await upsert({
         name: String(fd.get("name") ?? ""),
-        ssmRegistrationNo: String(fd.get("ssm") ?? "") || undefined,
+        country,
+        registrationNo: String(fd.get("registrationNo") ?? "") || undefined,
         contactEmail: String(fd.get("contactEmail") ?? ""),
         categories: [...categories],
       });
@@ -75,11 +91,28 @@ export function BusinessSetup() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">Business name</Label>
-              <Input id="name" name="name" required placeholder="Kedai Kopi Sdn Bhd" />
+              <Input id="name" name="name" required placeholder="Acme Sdn Bhd" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ssm">SSM registration no. (optional)</Label>
-              <Input id="ssm" name="ssm" placeholder="202301012345" />
+              <Label htmlFor="country">Country</Label>
+              <Select
+                id="country"
+                name="country"
+                value={country}
+                onChange={(e) => changeCountry(e.target.value as Country)}
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>
+                    {COUNTRY_LABELS[c]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="registrationNo">
+                Business registration no. (optional)
+              </Label>
+              <Input id="registrationNo" name="registrationNo" placeholder="202301012345" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="contactEmail">Contact email</Label>
@@ -88,7 +121,7 @@ export function BusinessSetup() {
                 name="contactEmail"
                 type="email"
                 required
-                placeholder="owner@kedai.com"
+                placeholder="owner@company.com"
               />
               <p className="text-xs text-muted-foreground">
                 Replies and alerts go here. Forward notices from this address so
@@ -96,23 +129,25 @@ export function BusinessSetup() {
               </p>
             </div>
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Regulators</legend>
+              <legend className="text-sm font-medium">
+                Regulators in {COUNTRY_LABELS[country]}
+              </legend>
               <div className="flex flex-wrap gap-2">
-                {AGENCIES.map((a) => (
+                {agencies.map((a) => (
                   <motion.button
-                    key={a}
+                    key={a.code}
                     type="button"
                     layout
-                    onClick={() => toggle(a)}
-                    aria-pressed={categories.has(a)}
+                    onClick={() => toggle(a.code)}
+                    aria-pressed={categories.has(a.code)}
                     whileTap={{ scale: 0.94 }}
                     className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                      categories.has(a)
+                      categories.has(a.code)
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-input bg-background hover:bg-accent"
                     }`}
                   >
-                    {AGENCY_LABELS[a]}
+                    {AGENCY_LABELS[a.code] ?? a.label}
                   </motion.button>
                 ))}
               </div>

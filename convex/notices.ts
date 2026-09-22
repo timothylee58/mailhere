@@ -20,6 +20,7 @@ const noticeDoc = v.object({
   summary: v.optional(v.string()),
   replyText: v.optional(v.string()),
   language: v.optional(v.string()),
+  languageName: v.optional(v.string()),
   resolvedAt: v.optional(v.number()),
   error: v.optional(v.string()),
 });

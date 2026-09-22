@@ -1,13 +1,15 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { ALL_AGENCY_CODES, COUNTRIES } from "./agencyRegistry";
 
 export const agencyValidator = v.union(
-  v.literal("ssm"),
-  v.literal("lhdn"),
-  v.literal("kwsp"),
-  v.literal("socso"),
+  ...ALL_AGENCY_CODES.map((code) => v.literal(code)),
   v.literal("other"),
+);
+
+export const countryValidator = v.union(
+  ...COUNTRIES.map((code) => v.literal(code)),
 );
 
 export const noticeStatusValidator = v.union(
@@ -25,7 +27,8 @@ export default defineSchema({
   businesses: defineTable({
     userId: v.id("users"),
     name: v.string(),
-    ssmRegistrationNo: v.optional(v.string()),
+    country: countryValidator,
+    registrationNo: v.optional(v.string()),
     contactEmail: v.string(),
     categories: v.array(agencyValidator),
     createdAt: v.number(),
@@ -47,6 +50,7 @@ export default defineSchema({
     summary: v.optional(v.string()),
     replyText: v.optional(v.string()),
     language: v.optional(v.string()),
+    languageName: v.optional(v.string()),
     resolvedAt: v.optional(v.number()),
     error: v.optional(v.string()),
   })

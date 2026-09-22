@@ -4,7 +4,7 @@ import { useAction, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
 import { useEffect, useRef } from "react";
-import { AGENCY_LABELS, daysUntil, formatDeadline } from "@/lib/agencies";
+import { AGENCY_LABELS, COUNTRY_LABELS, daysUntil, formatDeadline } from "@/lib/agencies";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BusinessSetup } from "@/components/business-setup";
@@ -59,7 +59,7 @@ export function Dashboard() {
               MailHere
             </h1>
             <p className="text-sm text-muted-foreground">
-              {business.name} ·{" "}
+              {business.name} · {COUNTRY_LABELS[business.country]} ·{" "}
               {business.categories.map((c) => AGENCY_LABELS[c]).join(" · ")}
             </p>
           </div>
@@ -83,7 +83,7 @@ export function Dashboard() {
             <InboxCard />
           </MotionItem>
           <MotionItem>
-            <DemoPanel />
+            <DemoPanel country={business.country} />
           </MotionItem>
         </div>
         <div className="lg:col-span-2 space-y-6">

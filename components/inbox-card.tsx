@@ -28,8 +28,8 @@ export function InboxCard() {
       <CardHeader>
         <CardTitle>Your compliance inbox</CardTitle>
         <CardDescription>
-          Forward any SSM, LHDN, KWSP or SOCSO notice to this address — from the
-          contact email on your business profile.
+          Forward any regulator notice to this address — from the contact
+          email on your business profile.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

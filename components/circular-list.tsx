@@ -40,8 +40,8 @@ export function CircularList() {
         <div>
           <CardTitle>Regulator circulars</CardTitle>
           <CardDescription>
-            Fresh items crawled from SSM, LHDN and KWSP that match your
-            registrations — matches are emailed to you automatically.
+            Fresh items crawled from your registered regulators that match
+            your registrations — matches are emailed to you automatically.
           </CardDescription>
         </div>
         <MotionButton

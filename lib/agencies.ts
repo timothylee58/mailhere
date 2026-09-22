@@ -1,17 +1,19 @@
-export const AGENCIES = ["ssm", "lhdn", "kwsp", "socso"] as const;
-export type Agency = (typeof AGENCIES)[number] | "other";
+export {
+  AGENCY_REGISTRY,
+  AGENCY_LABELS,
+  AGENCY_COUNTRY,
+  COUNTRIES,
+  COUNTRY_LABELS,
+  agenciesForCountry,
+  type Country,
+} from "@/convex/agencyRegistry";
 
-export const AGENCY_LABELS: Record<Agency, string> = {
-  ssm: "SSM",
-  lhdn: "LHDN",
-  kwsp: "KWSP",
-  socso: "SOCSO",
-  other: "Other",
-};
+export type Agency = string;
 
 export function formatDeadline(ts?: number): string {
   if (!ts) return "—";
-  return new Date(ts).toLocaleDateString("en-MY", {
+  // No fixed locale — renders in the viewer's own browser locale.
+  return new Date(ts).toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
     year: "numeric",

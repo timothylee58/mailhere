@@ -17,9 +17,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MailHere — Compliance inbox for Malaysian MSMEs",
+  title: "MailHere — Compliance inbox for small businesses",
   description:
-    "Forward SSM, LHDN, KWSP and SOCSO notices. MailHere extracts the deadline and required action, replies in plain language, and tracks everything live.",
+    "Forward regulator notices from any country's tax and company authorities. MailHere extracts the deadline and required action, replies in plain language, and tracks everything live.",
 };
 
 export default function RootLayout({

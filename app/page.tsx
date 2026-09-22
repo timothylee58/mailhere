@@ -56,10 +56,11 @@ function Landing() {
               Never miss a regulator deadline again.
             </h1>
             <p className="text-lg text-muted-foreground">
-              Forward notices from SSM, LHDN, KWSP or SOCSO to your MailHere inbox.
-              We extract the deadline and required action, reply in plain language,
-              and track everything on a live dashboard — plus we email you when new
-              circulars affect your business.
+              Forward notices from your tax office, companies registry, or
+              social security authority to your MailHere inbox. We extract
+              the deadline and required action, reply in plain language, and
+              track everything on a live dashboard — plus we email you when
+              new circulars affect your business.
             </p>
           </MotionItem>
           <MotionItem>

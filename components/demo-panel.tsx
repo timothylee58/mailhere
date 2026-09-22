@@ -15,17 +15,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { Country } from "@/lib/agencies";
 
 const MotionButton = motion(Button);
 
-const SAMPLE = {
-  subject: "SSM: Reminder to lodge annual return",
-  text: "Dear Sir/Madam, this is a reminder from Suruhanjaya Syarikat Malaysia (SSM) that your company's Annual Return must be lodged within 30 days of your incorporation anniversary. Please submit via the MBRS portal by 15 October 2026. Late lodgement compounds may apply under the Companies Act 2016.",
+const SAMPLES: Record<Country, { subject: string; text: string }> = {
+  MY: {
+    subject: "SSM: Reminder to lodge annual return",
+    text: "Dear Sir/Madam, this is a reminder from Suruhanjaya Syarikat Malaysia (SSM) that your company's Annual Return must be lodged within 30 days of your incorporation anniversary. Please submit via the MBRS portal by 15 October 2026. Late lodgement compounds may apply under the Companies Act 2016.",
+  },
+  US: {
+    subject: "IRS: Estimated tax payment reminder",
+    text: "This is a reminder from the Internal Revenue Service that your Q3 estimated tax payment is due. Please submit payment via EFTPS or IRS Direct Pay by 15 October 2026. Penalties may apply for late or underpaid estimated tax.",
+  },
+  UK: {
+    subject: "HMRC: Corporation Tax return due",
+    text: "This is a reminder from HM Revenue & Customs that your Corporation Tax return (CT600) is due. Please file online via your HMRC business account by 15 October 2026. Penalties apply for late filing under the Finance Act.",
+  },
+  SG: {
+    subject: "ACRA: Annual return filing reminder",
+    text: "This is a reminder from the Accounting and Corporate Regulatory Authority (ACRA) that your company's Annual Return must be filed within 7 months of financial year end. Please submit via BizFile+ by 15 October 2026. Late filing penalties apply under the Companies Act.",
+  },
 };
 
-export function DemoPanel() {
+export function DemoPanel({ country }: { country: Country }) {
   const simulate = useAction(api.demo.simulateInbound);
   const [busy, setBusy] = useState(false);
+  const sample = SAMPLES[country] ?? SAMPLES.MY;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,10 +67,10 @@ export function DemoPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form key={country} onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" name="subject" defaultValue={SAMPLE.subject} required />
+            <Input id="subject" name="subject" defaultValue={sample.subject} required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="text">Notice text</Label>
@@ -63,7 +79,7 @@ export function DemoPanel() {
               name="text"
               required
               rows={4}
-              defaultValue={SAMPLE.text}
+              defaultValue={sample.text}
             />
           </div>
           <MotionButton

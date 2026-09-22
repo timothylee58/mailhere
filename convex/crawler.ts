@@ -12,35 +12,34 @@ import {
 } from "./_generated/server";
 import { chatJSON } from "./openai";
 import { agencyValidator } from "./schema";
+import {
+  AGENCY_LABELS,
+  AGENCY_REGISTRY,
+  ALL_AGENCY_CODES,
+  COUNTRIES,
+} from "./agencyRegistry";
 
 const firecrawl = new FirecrawlClient(components.firecrawl);
 const agentmail = new AgentMail(components.agentmail);
 
+const AGENCY_LIST = ALL_AGENCY_CODES.join(", ");
+
+// One crawl source per agency that publishes an announcements/news page.
 const SOURCES: {
   key: string;
   name: string;
-  agency: "ssm" | "lhdn" | "kwsp" | "socso";
+  agency: string;
   url: string;
-}[] = [
-  {
-    key: "ssm",
-    name: "SSM — Announcements",
-    agency: "ssm",
-    url: "https://www.ssm.com.my/Pages/Announcement.aspx",
-  },
-  {
-    key: "lhdn",
-    name: "LHDN — Media Releases",
-    agency: "lhdn",
-    url: "https://www.hasil.gov.my/en/media/media-release/",
-  },
-  {
-    key: "kwsp",
-    name: "KWSP — News",
-    agency: "kwsp",
-    url: "https://www.kwsp.gov.my/en/w/news",
-  },
-];
+}[] = COUNTRIES.flatMap((country) =>
+  AGENCY_REGISTRY[country]
+    .filter((a) => a.sourceUrl)
+    .map((a) => ({
+      key: a.code,
+      name: a.label,
+      agency: a.code,
+      url: a.sourceUrl!,
+    })),
+);
 
 // --- seeds + bookkeeping ---
 
@@ -178,12 +177,20 @@ export const sendDigest = internalMutation({
 
 type ListedItem = { title: string; url: string; publishedAt: string | null };
 type Classification = {
-  agency: "ssm" | "lhdn" | "kwsp" | "socso" | "other";
-  categories: ("ssm" | "lhdn" | "kwsp" | "socso")[];
+  agency: string;
+  categories: string[];
   deadline: string | null;
   summary: string;
   affectsSMEs: boolean;
 };
+
+function toKnownAgency(code: string | undefined | null): string {
+  return code && ALL_AGENCY_CODES.includes(code) ? code : "other";
+}
+
+function agencyLabel(code: string): string {
+  return AGENCY_LABELS[code] ?? code;
+}
 
 export const runSource = internalAction({
   args: { sourceKey: v.string(), inboxId: v.string() },
@@ -206,7 +213,7 @@ export const runSource = internalAction({
 
     // 2. OpenAI extracts the announcement items from the page.
     const extracted = await chatJSON<{ items: ListedItem[] }>(
-      `Extract the announcement/circular/news items from this Malaysian regulator webpage. Return JSON: {"items":[{"title":string,"url":string,"publishedAt":"YYYY-MM-DD"|null}]}. At most 8 most recent items. Absolute URLs only. JSON only.`,
+      `Extract the announcement/circular/news items from this regulator webpage. Return JSON: {"items":[{"title":string,"url":string,"publishedAt":"YYYY-MM-DD"|null}]}. At most 8 most recent items. Absolute URLs only. JSON only.`,
       `Source: ${source.name}\n\nMarkdown:\n${(listing.markdown ?? "").slice(0, 12000)}\n\nLinks:\n${(listing.links ?? []).slice(0, 60).join("\n")}`,
     );
 
@@ -233,17 +240,21 @@ export const runSource = internalAction({
 
       // 4. Classify for relevance.
       const cls = await chatJSON<Classification>(
-        `Classify this Malaysian regulator publication for SME relevance. JSON keys:
-- "agency": "ssm"|"lhdn"|"kwsp"|"socso"|"other"
-- "categories": array subset of ["ssm","lhdn","kwsp","socso"] — which regulator areas it affects
+        `Classify this regulator publication for small/medium business relevance. JSON keys:
+- "agency": one of ${AGENCY_LIST}, or "other"
+- "categories": array subset of [${AGENCY_LIST}] — which regulator areas it affects
 - "deadline": "YYYY-MM-DD"|null — compliance deadline if any
 - "summary": at most two plain-language sentences
-- "affectsSMEs": boolean — true if a Malaysian SME should act or be aware
+- "affectsSMEs": boolean — true if a small/medium business should act or be aware
 JSON only.`,
         `Title: ${item.title}\nURL: ${item.url}\nPublished: ${item.publishedAt ?? "unknown"}\n\nContent:\n${detail.slice(0, 10000)}`,
       );
       if (!cls.affectsSMEs) continue;
 
+      const agency = toKnownAgency(cls.agency);
+      const categories = (cls.categories ?? []).filter((c) =>
+        ALL_AGENCY_CODES.includes(c),
+      );
       const deadline = cls.deadline
         ? Date.parse(`${cls.deadline}T00:00:00Z`)
         : undefined;
@@ -253,12 +264,12 @@ JSON only.`,
         {
           url: item.url,
           title: item.title,
-          agency: cls.agency,
+          agency,
           sourceKey,
           publishedAt: item.publishedAt
             ? Date.parse(`${item.publishedAt}T00:00:00Z`)
             : undefined,
-          categories: cls.categories,
+          categories,
           summary: cls.summary,
           deadline: Number.isNaN(deadline) ? undefined : deadline,
         },
@@ -268,7 +279,7 @@ JSON only.`,
       // 5. Proactively email matching businesses.
       const businesses = await ctx.runQuery(internal.businesses.listAll, {});
       for (const b of businesses as { _id: string; categories: string[]; contactEmail: string; name: string }[]) {
-        const match = b.categories.some((c) => cls.categories.includes(c as never));
+        const match = b.categories.some((c) => categories.includes(c));
         if (!match) continue;
         const dup = await ctx.runQuery(internal.crawler.alreadyNotified, {
           businessId: b._id as never,
@@ -276,18 +287,19 @@ JSON only.`,
         });
         if (dup) continue;
 
+        const label = agencyLabel(agency);
         const outboundId = await ctx.runMutation(
           internal.crawler.sendDigest,
           {
             inboxId,
             to: b.contactEmail,
-            subject: `[${cls.agency.toUpperCase()}] ${item.title}`,
+            subject: `[${label}] ${item.title}`,
             text:
-              `Hi ${b.name},\n\nA new ${cls.agency.toUpperCase()} publication may affect your business.\n\n` +
+              `Hi ${b.name},\n\nA new ${label} publication may affect your business.\n\n` +
               `${item.title}\n${item.url}\n\n` +
               `Summary: ${cls.summary}\n` +
               (cls.deadline ? `Deadline: ${cls.deadline}\n` : "") +
-              `\nYou are receiving this because your registered categories include ${b.categories.join(", ")}.\n— MailHere`,
+              `\nYou are receiving this because your registered categories include ${b.categories.map(agencyLabel).join(", ")}.\n— MailHere`,
           },
         );
         await ctx.runMutation(internal.crawler.recordNotification, {
