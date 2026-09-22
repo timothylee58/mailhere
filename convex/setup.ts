@@ -47,6 +47,13 @@ export const ensureInbox = internalAction({
       inbox_id?: string;
     };
 
+    const clientId = "mailhere-shared-inbox";
+    const body = JSON.stringify({
+      username: "mailhere",
+      display_name: "MailHere",
+      client_id: clientId,
+    });
+
     let inbox: { inbox_id?: string; email?: string; address?: string };
 
     if (identity.scope_type === "inbox" && identity.inbox_id) {
@@ -67,19 +74,48 @@ export const ensureInbox = internalAction({
           Authorization: `Bearer ${trimmed}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: "mailhere",
-          display_name: "MailHere",
-          client_id: "mailhere-shared-inbox",
-        }),
+        body,
       });
       if (!response.ok) {
         const text = await response.text();
         throw new Error(`AgentMail create inbox failed: ${response.status} ${text.slice(0, 500)}. Ensure the key has permission to create inboxes.`);
       }
       inbox = await response.json();
+    } else if (identity.scope_type === "pod" && identity.pod_id) {
+      // Pod-scoped keys must create inside the pod.
+      const createResp = await fetch(`${baseUrl}/pods/${identity.pod_id}/inboxes`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${trimmed}`,
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+      if (createResp.ok) {
+        inbox = await createResp.json();
+      } else if (createResp.status === 409 || createResp.status === 422) {
+        // Likely already exists with this client_id; list and reuse.
+        const listResp = await fetch(`${baseUrl}/pods/${identity.pod_id}/inboxes?limit=100`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${trimmed}` },
+        });
+        if (!listResp.ok) {
+          const text = await listResp.text();
+          throw new Error(`AgentMail pod inbox list failed: ${listResp.status} ${text.slice(0, 500)}.`);
+        }
+        const list = (await listResp.json()) as { inboxes?: Array<{ inbox_id?: string; email?: string; client_id?: string }> };
+        const existing = list.inboxes?.find((i) => i.client_id === clientId);
+        if (!existing || !existing.inbox_id) {
+          const text = await createResp.text();
+          throw new Error(`AgentMail create inbox failed: ${createResp.status} ${text.slice(0, 500)} and no existing inbox with client_id ${clientId} was found.`);
+        }
+        inbox = existing;
+      } else {
+        const text = await createResp.text();
+        throw new Error(`AgentMail create inbox failed: ${createResp.status} ${text.slice(0, 500)}. Ensure the key has permission to create inboxes in pod ${identity.pod_id}.`);
+      }
     } else {
-      throw new Error(`Unsupported AgentMail key scope: ${identity.scope_type}. Use an organization-level or inbox-scoped API key.`);
+      throw new Error(`Unsupported AgentMail key scope: ${identity.scope_type}. Use an organization-level, pod-scoped, or inbox-scoped API key.`);
     }
 
     const inboxId = inbox.inbox_id ?? "";
